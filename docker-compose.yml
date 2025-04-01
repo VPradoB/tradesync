@@ -1,0 +1,30 @@
+services:
+  writer-api:
+    build: ./src/writer_api
+    container_name: writer-api
+    ports:
+      - "5001:8000"
+    networks:
+      - backend
+  reader-api:
+    build: ./src/reader_api
+    container_name: reader-api 
+    ports:
+      - "5002:8000"
+    networks:
+      - backend
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./src/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8000:80"
+    depends_on:
+      - writer-api
+      - reader-api
+    networks:
+      - backend
+
+networks:
+  backend:
