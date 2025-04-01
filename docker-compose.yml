@@ -25,6 +25,73 @@ services:
       - reader-api
     networks:
       - backend
+  mongodb:
+    image: mongo:latest
+    container_name: event-source
+    restart: always
+    ports: 
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - backend
+    volumes: 
+      - event_source_data:/data/db
+  postgres:
+    image: postgres:latest
+    container_name: reader-database
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    networks:
+      - backend
+    volumes:
+      - reader_db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    container_name: reader-db-cache-server
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    volumes:
+      - cache_server_data:/data
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
 
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - backend
+# just using one network for simplicity.
 networks:
   backend:
+
+volumes:
+  reader_db_data:
+  event_source_data:
+  cache_server_data:
