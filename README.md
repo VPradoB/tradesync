@@ -1,9 +1,9 @@
 # TradeSync - Real-Time Transaction Analysis Platform
 
 ## Description
-TradeSync is an advanced real-time financial transaction processing and analysis system. It leverages **CQRS, Event Sourcing, and Repository Pattern with Unit of Work** to ensure a highly scalable, auditable, and optimized system for fast queries.
+TradeSync is a specialized module for managing Stripe transactions, designed to be easily integrated into any project with minimal configuration. It features an optimized architecture based on CQRS, Event Sourcing, and the Repository Pattern with Unit of Work, ensuring efficient and auditable payment processing.
 
-This project is ideal for fintechs, auditing, and fraud detection, where each transaction must be traceable and auditable.
+This module is ideal for developers looking for a scalable and reusable solution to handle payments without dealing with the complexity of Stripe integration.
 
 ## Technologies Used
 - **Backend:** FastAPI (Python)
