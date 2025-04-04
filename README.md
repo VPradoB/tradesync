@@ -8,10 +8,9 @@ This module is ideal for developers looking for a scalable and reusable solution
 ## Technologies Used
 - **Backend:** FastAPI (Python)
 - **Database:** PostgreSQL + Redis (for caching)
-- **Messaging:** Kafka or RabbitMQ
+- **Messaging:** Kafka
 - **Infrastructure:** Docker + Kubernetes + Terraform
 - **Logging & Monitoring:** Prometheus + Grafana
-- **CI/CD:** GitHub Actions
 
 ## Key Features
 ### 📥 Transaction Processing (Command Side - CQRS)

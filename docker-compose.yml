@@ -1,11 +1,14 @@
 services:
   writer-api:
-    build: ./src/writer_api
+    build:
+      context: ./src/writer_api
     container_name: writer-api
     ports:
       - "5001:8000"
     networks:
       - backend
+    env_file:
+      - ./src/writer_api/.env
   reader-api:
     build: ./src/reader_api
     container_name: reader-api 
@@ -25,20 +28,17 @@ services:
       - reader-api
     networks:
       - backend
-  mongodb:
-    image: mongo:latest
-    container_name: event-source
-    restart: always
-    ports: 
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+  stripe-listener:
+    image: stripe/stripe-cli
+    container_name: stripe-listener
+    entrypoint: sh -c "stripe listen --forward-to http://host.docker.internal:5001/webhook | tee /whsec.txt"
+    env_file:
+      - src/simulator/.env
     networks:
       - backend
-    volumes: 
-      - event_source_data:/data/db
-  postgres:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  reader-database:
     image: postgres:latest
     container_name: reader-database
     restart: always
