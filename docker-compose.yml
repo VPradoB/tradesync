@@ -38,6 +38,19 @@ services:
       - backend
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  mongodb:
+     image: mongo:latest
+     container_name: event-source
+     restart: always
+     ports: 
+       - "27017:27017"
+     environment:
+       MONGO_INITDB_ROOT_USERNAME: root
+       MONGO_INITDB_ROOT_PASSWORD: example
+     networks:
+       - backend
+     volumes: 
+       - event_source_data:/data/db
   reader-database:
     image: postgres:latest
     container_name: reader-database
