@@ -1,5 +1,44 @@
 package model
 
+import (
+	"encoding/json"
+	"github.com/stripe/stripe-go/v82"
+)
+
+func ParseStripeEvent(event stripe.Event) (StripeEvent, error) {
+	var setupIntent SetupIntent
+
+	// Deserializar el objeto dentro del evento
+	if err := json.Unmarshal(event.Data.Raw, &setupIntent); err != nil {
+		return StripeEvent{}, err
+	}
+
+	var requestID *string
+	if event.Request != nil {
+		requestID = stripe.String(event.Request.ID)
+	}
+
+	var idempotencyKey *string
+	if event.Request != nil {
+		idempotencyKey = stripe.String(event.Request.IdempotencyKey)
+	}
+
+	return StripeEvent{
+		ID:              event.ID,
+		Object:          event.Object,
+		APIVersion:      event.APIVersion,
+		Created:         event.Created,
+		Data:            StripeEventData{Object: setupIntent},
+		Livemode:        event.Livemode,
+		PendingWebhooks: event.PendingWebhooks,
+		Request: StripeEventRequest{
+			ID:             requestID,
+			IdempotencyKey: idempotencyKey,
+		},
+		Type: string(event.Type),
+	}, nil
+}
+
 type StripeEvent struct {
 	ID              string             `json:"id"`
 	Object          string             `json:"object"`
@@ -7,7 +46,7 @@ type StripeEvent struct {
 	Created         int64              `json:"created"`
 	Data            StripeEventData    `json:"data"`
 	Livemode        bool               `json:"livemode"`
-	PendingWebhooks int                `json:"pending_webhooks"`
+	PendingWebhooks int64              `json:"pending_webhooks"`
 	Request         StripeEventRequest `json:"request"`
 	Type            string             `json:"type"`
 }
