@@ -19,6 +19,6 @@ EXPOSE 8000
 ENV PORT=8000
 
 RUN chmod +x webhook
+RUN touch /db.sqlite
 CMD ["./webhook"]
-
 

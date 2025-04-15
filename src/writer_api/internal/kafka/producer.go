@@ -10,9 +10,10 @@ import (
 )
 
 var producer sarama.SyncProducer
+var topic string
 
 // InitProducer crea e inicializa el Kafka SyncProducer.
-func InitProducer(brokers []string) error {
+func InitProducer(brokers []string, t string) error {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
@@ -25,6 +26,7 @@ func InitProducer(brokers []string) error {
 	}
 
 	producer = p
+	topic = t
 	log.Println("✅ Kafka producer initialized")
 	return nil
 }
@@ -39,7 +41,7 @@ func CloseProducer() {
 }
 
 // SendStripeEvent serializa y envía el evento al topic.
-func SendStripeEvent(topic string, event model.StripeEvent) error {
+func SendStripeEvent(event model.StripeEvent) error {
 	if producer == nil {
 		return sarama.ErrClosedClient
 	}

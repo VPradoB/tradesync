@@ -28,10 +28,11 @@ func InitMongo() error {
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
+		log.Printf("❌ Error connecting MongoDB: %v", err)
 		return err
 	}
 
-	log.Println("MongoDB connected")
+	log.Println("✅ MongoDB connected")
 	return nil
 }
 

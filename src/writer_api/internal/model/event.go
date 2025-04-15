@@ -2,13 +2,12 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/stripe/stripe-go/v82"
+	"github.com/stripe/stripe-go/v81"
 )
 
 func ParseStripeEvent(event stripe.Event) (StripeEvent, error) {
 	var setupIntent SetupIntent
 
-	// Deserializar el objeto dentro del evento
 	if err := json.Unmarshal(event.Data.Raw, &setupIntent); err != nil {
 		return StripeEvent{}, err
 	}

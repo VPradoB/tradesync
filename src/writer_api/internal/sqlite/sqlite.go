@@ -3,6 +3,8 @@ package sqlite
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
+
 	_ "github.com/mattn/go-sqlite3"
 
 	"writer-api/internal/model"
@@ -12,10 +14,12 @@ type SQLiteStore struct {
 	db *sql.DB
 }
 
-func NewSQLiteStore(path string) (*SQLiteStore, error) {
+var store *SQLiteStore
+
+func NewSQLiteStore(path string) error {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	query := `
@@ -27,29 +31,44 @@ func NewSQLiteStore(path string) (*SQLiteStore, error) {
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 	`
+	store = &SQLiteStore{db: db}
+	log.Println("✅ SQLite db connected")
 	if _, err := db.Exec(query); err != nil {
-		return nil, err
+		log.Println("⚠️ SQLite db was initialized already")
+		return nil
 	}
 
-	return &SQLiteStore{db: db}, nil
+	log.Println("✅ SQLite db initialized")
+	return nil
 }
 
-func (s *SQLiteStore) SaveFailedEvent(event model.StripeEvent, failedKafka, failedMongo bool) error {
+func CloseConnection() error {
+	err := store.db.Close()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SaveFailedEvent(event model.StripeEvent, failedKafka, failedMongo bool) error {
 	jsonData, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
 
+	// TODO: check sql injection
 	query := `
 	INSERT OR REPLACE INTO failed_events (id, event_json, failed_kafka, failed_mongo)
 	VALUES (?, ?, ?, ?);
 	`
-	_, err = s.db.Exec(query, event.ID, string(jsonData), failedKafka, failedMongo)
+	_, err = store.db.Exec(query, event.ID, string(jsonData), failedKafka, failedMongo)
 	return err
 }
 
-func (s *SQLiteStore) GetPendingEvents() ([]model.StripeEvent, error) {
-	rows, err := s.db.Query("SELECT event_json FROM failed_events")
+func GetPendingEvents() ([]model.StripeEvent, error) {
+	rows, err := store.db.Query("SELECT event_json FROM failed_events")
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +91,7 @@ func (s *SQLiteStore) GetPendingEvents() ([]model.StripeEvent, error) {
 	return events, nil
 }
 
-func (s *SQLiteStore) DeleteEvent(id string) error {
-	_, err := s.db.Exec("DELETE FROM failed_events WHERE id = ?", id)
+func DeleteEvent(id string) error {
+	_, err := store.db.Exec("DELETE FROM failed_events WHERE id = ?", id)
 	return err
 }

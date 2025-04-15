@@ -1,4 +1,6 @@
 services:
+  # TODO: sometimes got errors connecting to kafka because kafka is not ready.
+  # TODO: standarize containers names and titles.
   writer-api:
     build:
       context: ./src/writer_api
@@ -16,6 +18,9 @@ services:
       - "5002:8000"
     networks:
       - backend
+    depends_on:
+      - kafka
+      - mongodb
   nginx:
     image: nginx:latest
     container_name: nginx
