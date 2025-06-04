@@ -13,10 +13,12 @@ import (
 var client *mongo.Client
 
 func InitMongo() error {
-	uri := os.Getenv("MONGODB_URI")
+	uri := os.Getenv("MONGO_URI")
 	if uri == "" {
 		uri = "mongodb://localhost:27017"
 	}
+
+	log.Printf("🔗 Attempting to connect to MongoDB with URI: %s", uri)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -24,15 +26,16 @@ func InitMongo() error {
 	var err error
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
+		log.Printf("❌ Error creating MongoDB client: %v", err)
 		return err
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Printf("❌ Error connecting MongoDB: %v", err)
+		log.Printf("❌ Error pinging MongoDB: %v", err)
 		return err
 	}
 
-	log.Println("✅ MongoDB connected")
+	log.Println("✅ MongoDB connected successfully")
 	return nil
 }
 

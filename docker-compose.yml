@@ -11,6 +11,11 @@ services:
       - backend
     env_file:
       - ./src/writer_api/.env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_started
   reader-api:
     build: ./src/reader_api
     container_name: reader-api 
@@ -56,6 +61,12 @@ services:
        - backend
      volumes: 
        - event_source_data:/data/db
+     healthcheck:
+       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+       interval: 10s
+       timeout: 5s
+       retries: 5
+       start_period: 30s
   reader-database:
     image: postgres:latest
     container_name: reader-database

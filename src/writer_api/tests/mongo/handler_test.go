@@ -9,7 +9,7 @@ import (
 )
 
 func TestSaveStripeEvent(t *testing.T) {
-	_ = os.Setenv("MONGODB_URI", "mongodb://root:example@localhost:27017")
+	_ = os.Setenv("MONGO_URI", "mongodb://root:example@localhost:27017")
 
 	if err := mongo.InitMongo(); err != nil {
 		t.Fatalf("❌ Failed to init Mongo: %v", err)
